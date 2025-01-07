@@ -78,8 +78,6 @@ def profile():
         # Update user profile logic here (e.g., update username, email, password)
         current_user.username = request.form['username']
         current_user.email = request.form['email']
-        if request.form['password']:
-            current_user.set_password(request.form['password'])  # Assuming a set_password method is available
         db.session.commit()
         return redirect(url_for('profile'))  # Redirect back to the profile page after saving changes
     return render_template('profile.html')
@@ -301,7 +299,7 @@ def payment():
     return render_template('payment.html', hire_details=hire_details)
 
 
-@app.route('/adminpayment', methods=['GET'])
+@app.route('/adminpayment', methods=['GET',"POST"])
 @login_required
 def adminpayment():
     # Fetch all hireinfo entries where hire_status is False (pending)
@@ -324,6 +322,26 @@ def payment_done(hire_id):
         db.session.commit()
         flash("Payment marked as Done.", "success")
     return redirect(url_for('adminpayment'))
+
+@app.route('/payment/reject/<int:hire_id>', methods=['POST'])
+@login_required
+def reject_payment(hire_id):
+    # Fetch the hire record
+    hire_info = HireInfo.query.get(hire_id)
+    if hire_info:
+        # Update the hire record's hire_status
+        hire_info.hire_status = 1  # Mark as rejected
+        
+        # Fetch and update the worker's active_status
+        worker = Worker.query.get(hire_info.worker_id)
+        if worker:
+            worker.active_status = 1  # Mark as inactive or rejected
+        
+        # Commit changes to the database
+        db.session.commit()
+        flash("Transaction rejected successfully and worker status updated.", "warning")
+    return redirect(url_for('adminpayment'))
+
 
 
 

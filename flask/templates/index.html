@@ -1,3 +1,116 @@
 {% extends "base.html" %}
-{% block title %}About{% endblock title %}
-{% block body %}Hi {{username}} {% endblock body %}
+
+{% block title %}Home - Sohojogi{% endblock title %}
+
+{% block body %}
+<section class="hero-section text-white text-center py-5" style="background: linear-gradient(45deg, #1f1e18, #EFB6C8);">
+  <div class="container">
+    <h1 class="display-4 fw-bold">Welcome to Sohojogi</h1>
+    <p class="lead">Connecting you with trusted workers for your daily needs.</p>
+    <a href="/services" class="btn btn-outline-light btn-lg mt-3">Explore Services</a>
+  </div>
+</section>
+
+<section class="services-section py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Our Services</h2>
+      <p class="text-muted">Discover a range of services to make your life easier.</p>
+    </div>
+    <div class="row g-4">
+      <!-- Card 1 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body text-center">
+            <div class="icon-container mb-3">
+              <i class="bi bi-house-door-fill fs-1 text-warning"></i>
+            </div>
+            <h5 class="card-title fw-bold">Home Services</h5>
+            <p class="card-text text-muted">Professional cleaning, maintenance, and more at your convenience.</p>
+            <a href="/services#home" class="btn btn-sm" style="background-color: #8174A0; color: white;">Learn More</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body text-center">
+            <div class="icon-container mb-3">
+              <i class="bi bi-person-badge-fill fs-1 text-warning"></i>
+            </div>
+            <h5 class="card-title fw-bold">Find Workers</h5>
+            <p class="card-text text-muted">Hire skilled professionals for specific tasks and roles.</p>
+            <a href="/workers" class="btn btn-sm" style="background-color: #8174A0; color: white;">Find Now</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body text-center">
+            <div class="icon-container mb-3">
+              <i class="bi bi-people-fill fs-1 text-warning"></i>
+            </div>
+            <h5 class="card-title fw-bold">Apply as Worker</h5>
+            <p class="card-text text-muted">Join our platform to showcase your skills and find jobs.</p>
+            <a href="/apply" class="btn btn-sm" style="background-color: #8174A0; color: white;">Apply Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials-section bg-light py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">What Our Clients Say</h2>
+      <p class="text-muted">Hear from those who trust us for their daily needs.</p>
+    </div>
+    <div class="row g-4">
+      <!-- Testimonial 1 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body">
+            <blockquote class="blockquote">
+              <p class="mb-3">"Sohojogi made finding reliable workers so easy. The experience was seamless."</p>
+              <footer class="blockquote-footer">Kingkor Sarker</footer>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+      <!-- Testimonial 2 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body">
+            <blockquote class="blockquote">
+              <p class="mb-3">"I love the variety of services offered. It's a one-stop solution!"</p>
+              <footer class="blockquote-footer">Afif Sunvi</footer>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+      <!-- Testimonial 3 -->
+      <div class="col-md-4">
+        <div class="card shadow border-0 h-100">
+          <div class="card-body">
+            <blockquote class="blockquote">
+              <p class="mb-3">"Applying as a worker was straightforward, and I quickly found jobs."</p>
+              <footer class="blockquote-footer">Mou</footer>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section text-white text-center py-5" style="background: linear-gradient(45deg, #EFB6C8, #1f1e18);">
+  <div class="container">
+    <h2 class="fw-bold">Ready to Get Started?</h2>
+    <p class="lead">Join us today to experience seamless services and trusted workers.</p>
+    <a href="/signup" class="btn btn-light btn-lg">Sign Up Now</a>
+  </div>
+</section>
+
+{% endblock body %}

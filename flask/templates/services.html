@@ -1,3 +1,83 @@
 {% extends "base.html" %}
-{% block title %}About{% endblock title %}
-{% block body %}This is about{% endblock body %}
+
+{% block title %}Our Services{% endblock title %}
+
+{% block body %}
+<section class="services">
+    <div class="hero-section text-white text-center py-5" style="background: linear-gradient(45deg, #1f1e18, #EFB6C8);">
+        <div class="container">
+          <h1 class="display-4 fw-bold">Our Services</h1>
+          <p class="lead">Explore the wide range of professional services we offer to make your life easier.</p>
+        </div>
+    </div>
+      
+  <div class="container my-5">
+    <h2 class="text-center fw-bold">What We Offer</h2>
+    <div class="row mt-4">
+      <div class="col-md-4 mb-4">
+        <div class="service-card p-4 border rounded shadow-sm">
+          <i class="bi bi-person-fill display-4 text-primary"></i>
+          <h4 class="mt-3">Personal Assistance</h4>
+          <p>Find skilled professionals for household help, including cleaning, cooking, and caregiving.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="service-card p-4 border rounded shadow-sm">
+          <i class="bi bi-house-door-fill display-4 text-warning"></i>
+          <h4 class="mt-3">Home Services</h4>
+          <p>Need a plumber, electrician, or handyman? We’ve got you covered with reliable home services.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="service-card p-4 border rounded shadow-sm">
+          <i class="bi bi-truck display-4 text-success"></i>
+          <h4 class="mt-3">Transportation</h4>
+          <p>Find professional drivers and reliable transportation services for your personal or business needs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-light py-5">
+    <div class="container text-center">
+      <h2 class="fw-bold">How It Works</h2>
+      <p class="lead">
+        Using SOHOJOGI is simple. Just follow these easy steps to get started with the best services in town!
+      </p>
+    </div>
+
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-md-4 text-center">
+          <div class="step-card p-4 border rounded shadow-sm">
+            <i class="bi bi-search display-4 text-primary"></i>
+            <h4 class="mt-3">Search for Services</h4>
+            <p>Browse through a wide selection of professional services and find what you need.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="step-card p-4 border rounded shadow-sm">
+            <i class="bi bi-person-check display-4 text-warning"></i>
+            <h4 class="mt-3">Choose Your Expert</h4>
+            <p>Pick a verified professional based on reviews, ratings, and availability.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="step-card p-4 border rounded shadow-sm">
+            <i class="bi bi-check-circle display-4 text-success"></i>
+            <h4 class="mt-3">Get the Job Done</h4>
+            <p>Schedule an appointment and let the professional take care of the task with quality.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-section text-white text-center py-5" style="background: linear-gradient(45deg, #EFB6C8, #1f1e18);">
+    <div class="container">
+      <h3 class="fw-bold">Ready to get started?</h3>
+      <a href="/services"  class="btn btn-light btn-lg">Browse Our Services</a>
+    </div>
+  </div>
+</section>
+{% endblock body %}
