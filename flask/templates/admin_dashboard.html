@@ -70,6 +70,9 @@
                         <a class="nav-link" href="{{ url_for('adminban') }}">Ban/Unban Workers</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('adminbook') }}">Book/Unbook Workers</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('adminpayment') }}">Payments</a>
                     </li>
                     <li class="nav-item">
@@ -109,9 +112,9 @@
                                         <td>{{ worker.name }}</td>
                                         <td>{{ worker.email }}</td>
                                         <td>{{ worker.phone }}</td>
-                                        <td>${{ worker.hourly_rate }}</td>
+                                        <td>{{ worker.hourly_rate }} taka</td>
                                         <td>
-                                            {% if worker.active_status %}
+                                            {% if worker.is_verified %}
                                             <span class="badge bg-success">Active</span>
                                             {% else %}
                                             <span class="badge bg-warning">Pending</span>

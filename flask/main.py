@@ -47,7 +47,9 @@ class Worker(db.Model):
     img_path = db.Column(db.String(255), nullable=True)
     hourly_rate = db.Column(db.Float, nullable=False)  
     nid = db.Column(db.String(20), nullable=False)  
-    active_status = db.Column(db.Boolean, default=True)
+    is_booked = db.Column(db.Boolean, default=False)
+    is_banned = db.Column(db.Boolean, default=True)
+    is_verified = db.Column(db.Boolean, default=False)
 
 from sqlalchemy.orm import relationship
 
@@ -70,15 +72,14 @@ class HireInfo(db.Model):
     # Relationship with worker
     worker = relationship('Worker', backref='hireinfo')
 
-
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'POST':
         # Update user profile logic here (e.g., update username, email, password)
-        current_user.username = request.form['username']
-        current_user.email = request.form['email']
-        db.session.commit()
+        current_user.username = request.form['username']  # UPDATE users SET username = 'new_username' WHERE id = current_user.id;
+        current_user.email = request.form['email']        # UPDATE users SET email = 'new_email' WHERE id = current_user.id;
+        db.session.commit()                               # COMMIT;
         return redirect(url_for('profile'))  # Redirect back to the profile page after saving changes
     return render_template('profile.html')
 
@@ -99,7 +100,7 @@ def adminban():
         return redirect(url_for('index'))
     
     # Fetch all workers (you can adjust this based on your ban logic)
-    workers_list = Worker.query.all()
+    workers_list = Worker.query.all()  # SELECT * FROM workers;
     
     return render_template('adminban.html', workers=workers_list)
 
@@ -110,9 +111,9 @@ def ban_worker(worker_id):
         flash("You are not authorized to perform this action.", "danger")
         return redirect(url_for('index'))
     
-    worker = Worker.query.get_or_404(worker_id)
-    worker.active_status = False  # Set worker as banned
-    db.session.commit()
+    worker = Worker.query.get_or_404(worker_id)  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
+    worker.is_banned = True  # UPDATE workers SET is_banned = TRUE WHERE id = worker_id;
+    db.session.commit()       # COMMIT;
     flash(f"Worker {worker.name} has been banned.", "success")
     return redirect(url_for('adminban'))
 
@@ -123,20 +124,18 @@ def unban_worker(worker_id):
         flash("You are not authorized to perform this action.", "danger")
         return redirect(url_for('index'))
     
-    worker = Worker.query.get_or_404(worker_id)
-    worker.active_status = True  # Set worker as active
-    db.session.commit()
+    worker = Worker.query.get_or_404(worker_id)    # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
+    worker.is_banned = False                       # UPDATE workers SET is_banned = FALSE WHERE id = worker_id;
+    db.session.commit()                             # COMMIT;
     flash(f"Worker {worker.name} has been unbanned.", "success")
     return redirect(url_for('adminban'))
 
 @app.route('/process_hire/<int:worker_id>', methods=['POST'])
 def process_hire(worker_id):
-    worker = Worker.query.get_or_404(worker_id)
+    worker = Worker.query.get_or_404(worker_id)  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
     # Additional logic for payment or confirmation
     flash(f"Worker {worker.name} hire process initiated.", "success")
     return redirect(url_for('workers'))
-
-
 
 @app.route('/services')
 def services():
@@ -144,14 +143,11 @@ def services():
 
 @app.route('/workers')
 def workers():
-    workers_list = Worker.query.filter_by(active_status=True).all()  # Only active workers
+    workers_list = Worker.query.filter_by(is_banned=False, is_booked=False, is_verified=True).all()  
+    # SELECT * FROM workers WHERE is_banned = FALSE AND is_booked = FALSE AND is_verified = TRUE;
     for worker in workers_list:
         worker.img_path = worker.img_path.replace(os.sep, '/')
     return render_template('workers.html', workers=workers_list)
-
-
-
-7
 
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'docx'}
@@ -194,14 +190,15 @@ def apply():
             img_path=img_path,  
             hourly_rate=hourly_rate,  
             nid=nid,  
-            active_status=False
+            is_banned=True,
+            is_booked=False,
+            is_verified=False
         )
+        # INSERT INTO workers (name, email, phone, cooking, cleaning, washing_clothes, about_you, img_path, hourly_rate, nid, is_banned, is_booked, is_verified) VALUES (...);
+        db.session.add(new_worker)  # INSERT operation as above
+        db.session.commit()          # COMMIT;
 
-        
-        db.session.add(new_worker)
-        db.session.commit()
-
-       
+        # Commit changes
         flash("Worker application successfully submitted!", "success")
         return render_template('success.html')  
 
@@ -214,8 +211,9 @@ def admin_dashboard():
         flash("You are not authorized to access this page.", "danger")
         return redirect(url_for('index'))
     
-    # Fetch workers with active_status set to False
-    pending_workers = Worker.query.filter_by(active_status=False).all()
+    # Fetch workers with is_verified set to False
+    pending_workers = Worker.query.filter_by(is_verified=False).all()  
+    # SELECT * FROM workers WHERE is_verified = FALSE;
     
     return render_template('admin_dashboard.html', pending_workers=pending_workers)
 
@@ -226,9 +224,9 @@ def approve_worker(worker_id):
         flash("You are not authorized to perform this action.", "danger")
         return redirect(url_for('index'))
     
-    worker = Worker.query.get_or_404(worker_id)
-    worker.active_status = True
-    db.session.commit()
+    worker = Worker.query.get_or_404(worker_id)  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
+    worker.is_verified = True                     # UPDATE workers SET is_verified = TRUE WHERE id = worker_id;
+    db.session.commit()                           # COMMIT;
     flash(f"Worker {worker.name} has been approved.", "success")
     return redirect(url_for('admin_dashboard'))
 
@@ -239,12 +237,12 @@ def reject_worker(worker_id):
         flash("You are not authorized to perform this action.", "danger")
         return redirect(url_for('index'))
     
-    worker = Worker.query.get_or_404(worker_id)
-    db.session.delete(worker)
-    db.session.commit()
+    worker = Worker.query.get_or_404(worker_id)   # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
+    worker.is_verified = False                     # UPDATE workers SET is_verified = FALSE WHERE id = worker_id;
+    # db.session.delete(worker)                   # DELETE FROM workers WHERE id = worker_id;
+    db.session.commit()                            # COMMIT;
     flash(f"Worker {worker.name} has been rejected and removed from the database.", "success")
     return redirect(url_for('admin_dashboard'))
-
 
 @app.route('/about')
 def about():
@@ -278,17 +276,18 @@ def payment():
             total_payment=hire_details['total_payment'],
             transaction_id=transaction_id
         )
-        db.session.add(hire_info)
+        # INSERT INTO hire_info (user_id, worker_id, hours, days, total_payment, transaction_id) VALUES (...);
+        db.session.add(hire_info)  # INSERT operation as above
 
-        # Update worker's active_status to 0 (inactive)
-        worker = Worker.query.get(hire_details['worker_id'])
+        # Update worker's is_booked to 1 (active)
+        worker = Worker.query.get(hire_details['worker_id'])  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
         if worker:
-            print(f"Worker found: {worker.id}, Current status: {worker.active_status}")
-            worker.active_status = 0  # Set to inactive
-            db.session.commit()
+            print(f"Worker found: {worker.id}, Current book status: {worker.is_booked}")
+            worker.is_booked = True  # UPDATE workers SET is_booked = TRUE WHERE id = worker_id;
+            db.session.commit()      # COMMIT;
 
         # Commit the session and clear session
-        db.session.commit()
+        db.session.commit()          # COMMIT;
 
         session.pop('hire_details', None)
         flash("Payment successful. Worker hired!", "success")
@@ -296,59 +295,55 @@ def payment():
 
     return render_template('payment.html', hire_details=hire_details)
 
-    return render_template('payment.html', hire_details=hire_details)
-
-
 @app.route('/adminpayment', methods=['GET',"POST"])
 @login_required
 def adminpayment():
     # Fetch all hireinfo entries where hire_status is False (pending)
-    hireinfo = HireInfo.query.filter_by(hire_status=False).all()
+    hireinfo = HireInfo.query.filter_by(hire_status=False).all()  
+    # SELECT * FROM hire_info WHERE hire_status = FALSE;
     
     # For each hireinfo, access related user and worker if needed
     for info in hireinfo:
-        info.user = info.user  # Ensure the relationship is loaded (optional, since it should load automatically)
-        info.worker = info.worker  # Ensure the relationship is loaded (optional, since it should load automatically)
-
+        info.user = info.user  # This typically involves a JOIN, e.g., SELECT * FROM hire_info JOIN users ON hire_info.user_id = users.id WHERE hire_info.hire_status = FALSE;
+        info.worker = info.worker  # Similarly, JOIN with workers table
     return render_template('adminpayment.html', hireinfo=hireinfo)
-
 
 @app.route('/payment/done/<int:hire_id>', methods=['POST'])
 @login_required
 def payment_done(hire_id):
-    hire_info = HireInfo.query.get(hire_id)
+    hire_info = HireInfo.query.get(hire_id)  # SELECT * FROM hire_info WHERE id = hire_id LIMIT 1;
     if hire_info:
-        hire_info.hire_status = True  # Mark the hire as completed (True)
-        db.session.commit()
-        flash("Payment marked as Done.", "success")
+        hire_info.hire_status = True  # UPDATE hire_info SET hire_status = TRUE WHERE id = hire_id;
+    worker = Worker.query.get(hire_info.worker_id)  # SELECT * FROM workers WHERE id = hire_info.worker_id LIMIT 1;
+    if worker:
+        worker.is_booked = True    # UPDATE workers SET is_booked = TRUE WHERE id = worker_id;
+    db.session.commit()            # COMMIT;
+    flash("Payment marked as Done.", "success")
     return redirect(url_for('adminpayment'))
 
 @app.route('/payment/reject/<int:hire_id>', methods=['POST'])
 @login_required
 def reject_payment(hire_id):
     # Fetch the hire record
-    hire_info = HireInfo.query.get(hire_id)
+    hire_info = HireInfo.query.get(hire_id)  # SELECT * FROM hire_info WHERE id = hire_id LIMIT 1;
     if hire_info:
         # Update the hire record's hire_status
-        hire_info.hire_status = 1  # Mark as rejected
+        hire_info.hire_status = True  # UPDATE hire_info SET hire_status = TRUE WHERE id = hire_id;
         
-        # Fetch and update the worker's active_status
-        worker = Worker.query.get(hire_info.worker_id)
+        # Fetch and update the worker's is_booked status
+        worker = Worker.query.get(hire_info.worker_id)  # SELECT * FROM workers WHERE id = hire_info.worker_id LIMIT 1;
         if worker:
-            worker.active_status = 1  # Mark as inactive or rejected
+            worker.is_booked = False  # UPDATE workers SET is_booked = FALSE WHERE id = worker_id;
         
         # Commit changes to the database
-        db.session.commit()
+        db.session.commit()            # COMMIT;
         flash("Transaction rejected successfully and worker status updated.", "warning")
     return redirect(url_for('adminpayment'))
-
-
-
 
 @app.route('/hire/<int:worker_id>', methods=['GET', 'POST'])
 @login_required
 def hire_worker(worker_id):
-    worker = Worker.query.get_or_404(worker_id)  # Get the worker by ID
+    worker = Worker.query.get_or_404(worker_id)  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
     
     if request.method == 'POST':
         # Get hours and days from the form
@@ -367,7 +362,6 @@ def hire_worker(worker_id):
 
     return render_template('hire_confirmation.html', worker=worker)
 
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -377,32 +371,31 @@ def signup():
         username = request.form.get('username')
 
         # Check for existing email or NID
-        if user.query.filter_by(email=email).first():
+        if user.query.filter_by(email=email).first():  # SELECT * FROM users WHERE email = 'email' LIMIT 1;
             return render_template('signup.html', error="Email already exists.")
-        if user.query.filter_by(nid=nid).first():
+        if user.query.filter_by(nid=nid).first():      # SELECT * FROM users WHERE nid = 'nid' LIMIT 1;
             return render_template('signup.html', error="NID already exists.")
 
         # Encrypt password 
         encpassword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         new_user = user(username=username, email=email, password=encpassword, nid=nid)
-        db.session.add(new_user)
+        # INSERT INTO users (username, email, password, nid) VALUES (...);
+        db.session.add(new_user)  # INSERT operation as above
         try:
-            db.session.commit()
+            db.session.commit()      # COMMIT;
         except Exception as e:
-            db.session.rollback()
+            db.session.rollback()    # ROLLBACK;
             return render_template('signup.html', error="An error occurred while saving to the database.")
 
         return redirect('/login')
     return render_template('signup.html')
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        user_instance = user.query.filter_by(email=email).first()
+        user_instance = user.query.filter_by(email=email).first()  # SELECT * FROM users WHERE email = 'email' LIMIT 1;
 
         if user_instance and bcrypt.checkpw(password.encode('utf-8'), user_instance.password.encode('utf-8')):
             login_user(user_instance)  
@@ -416,6 +409,25 @@ def login():
     
     return render_template('login.html')
 
+@app.route('/adminbook', methods=['GET',"POST"])
+@login_required
+def adminbook():
+    # Fetch all hireinfo entries where hire_status is False (pending)
+    workers = Worker.query.all()  # SELECT * FROM workers;
+    return render_template('adminbook.html', workers=workers)
+
+@app.route('/unbook_worker/<int:worker_id>', methods=['POST'])
+@login_required
+def unbook_worker(worker_id):
+    if not current_user.is_admin:
+        flash("You are not authorized to perform this action.", "danger")
+        return redirect(url_for('index'))
+    
+    worker = Worker.query.get_or_404(worker_id)  # SELECT * FROM workers WHERE id = worker_id LIMIT 1;
+    worker.is_booked = False                     # UPDATE workers SET is_booked = FALSE WHERE id = worker_id;
+    db.session.commit()                           # COMMIT;
+    flash(f"Worker {worker.name} has been unbooked.", "success")
+    return redirect(url_for('adminbook'))
 
 @app.route('/logout')
 @login_required
@@ -423,8 +435,8 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 

@@ -109,16 +109,17 @@
                         <td>{{ worker.name }}</td>
                         <td>{{ worker.email }}</td>
                         <td>{{ worker.phone }}</td>
-                        <td>{{ 'Banned' if not worker.active_status else 'Active' }}</td>
+                        <td>{{ 'Banned' if not worker.is_banned else 'Active' }}</td>
                         <td>
-                            {% if worker.active_status %}
-                                <form action="{{ url_for('ban_worker', worker_id=worker.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="btn btn-warning">Ban</button>
-                                </form>
+                            {% if worker.is_banned %}
+                            <form action="{{ url_for('unban_worker', worker_id=worker.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-success">Unban</button>
+                            </form>
                             {% else %}
-                                <form action="{{ url_for('unban_worker', worker_id=worker.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="btn btn-success">Unban</button>
-                                </form>
+                            <form action="{{ url_for('ban_worker', worker_id=worker.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-warning">Ban</button>
+                            </form>
+                                
                             {% endif %}
                         </td>
                     </tr>
