@@ -99,7 +99,6 @@ def adminban():
         flash("You are not authorized to access this page.", "danger")
         return redirect(url_for('index'))
     
-
     workers_list = Worker.query.all()  # SELECT * FROM workers;
     
     return render_template('adminban.html', workers=workers_list)
@@ -438,6 +437,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
